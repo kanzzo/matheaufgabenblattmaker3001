@@ -195,9 +195,13 @@ details.info-block summary {
   color: var(--text-secondary);
 }
 
-details.info-block p, details.info-block pre {
+details.info-block p, details.info-block pre, details.info-block ul, details.info-block li {
   font-size: 13px;
+  font-weight: normal;
   color: var(--text-secondary);
+}
+
+details.info-block p, details.info-block pre {
   white-space: pre-wrap;
   margin: 8px 0;
 }
