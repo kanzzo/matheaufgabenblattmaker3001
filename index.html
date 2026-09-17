@@ -19,7 +19,7 @@
       <div class="panel-title-block">
         <h2><span class="editable" id="titleBtn">Mathe-Übungsblatt</span>-Generator</h2>
         <div class="date-line"><span class="editable" id="dateBtn"></span></div>
-        <div class="name-line"><span class="editable" id="nameBtn">Mia Keilmann</span></div>
+        <div class="name-line"><span class="editable" id="nameBtn">Name des Kindes</span></div>
       </div>
       <img src="assets/img/logo_rechts.png" alt="Logo rechts" class="logo-day">
       <img src="assets/img/logo_rechts_night.png" alt="Logo rechts" class="logo-night">
@@ -87,7 +87,7 @@ x+5=13
       <div class="title-block">
         <h1 id="sheetTitle">Mathe-Übungsblatt</h1>
         <div class="meta-line" id="sheetDate"></div>
-        <div class="student-name" id="sheetName">Mia Keilmann</div>
+        <div class="student-name" id="sheetName">Mia aus der Otterklasse</div>
       </div>
       <img src="assets/img/logo_rechts.png" alt="Logo rechts" class="logo-day">
       <img src="assets/img/logo_rechts_night.png" alt="Logo rechts" class="logo-night">
@@ -170,7 +170,7 @@ function formatDateDE(d) {
 }
 
 makeEditable(document.getElementById('titleBtn'), 'Mathe-Übungsblatt');
-makeEditable(document.getElementById('nameBtn'), 'Mia Keilmann');
+makeEditable(document.getElementById('nameBtn'), 'Name des Kindes');
 makeEditable(document.getElementById('dateBtn'), formatDateDE(new Date()));
 
 /* ---------- KI-Prompt kopieren ---------- */
@@ -185,6 +185,9 @@ document.getElementById('copyPromptBtn').addEventListener('click', () => {
 });
 
 /* ---------- Aufgaben-Parsing & Rendern ---------- */
+const NAME_PLACEHOLDER = "Name des Kindes";
+const NAME_FALLBACK = "Mia aus der Otterklasse";
+
 const DEFAULT_TASKS = `6*7=_
 6*_=60
 _*10=20
@@ -314,7 +317,8 @@ document.getElementById("generateBtn").addEventListener("click", () => {
 
   document.getElementById("sheetTitle").textContent = document.getElementById("titleBtn").dataset.value || "Übungsblatt";
   document.getElementById("sheetDate").textContent = document.getElementById("dateBtn").dataset.value || "";
-  document.getElementById("sheetName").textContent = document.getElementById("nameBtn").dataset.value || "";
+  const nameValue = document.getElementById("nameBtn").dataset.value;
+  document.getElementById("sheetName").textContent = (!nameValue || nameValue === NAME_PLACEHOLDER) ? NAME_FALLBACK : nameValue;
 
   document.getElementById("sheet").style.display = "block";
 
