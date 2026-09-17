@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Mathe-Übungsblatt-Generator</title>
+<link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+  <button class="theme-toggle" id="themeToggle" aria-label="Nachtmodus umschalten">☾</button>
+
+  <div class="input-panel">
+    <div class="panel-header">
+      <img src="assets/img/logo_links.png" alt="Logo links" class="logo-day">
+      <img src="assets/img/logo_links_night.png" alt="Logo links" class="logo-night">
+      <div class="panel-title-block">
+        <h2><span class="editable" id="titleBtn">Mathe-Übungsblatt</span>-Generator</h2>
+        <div class="date-line"><span class="editable" id="dateBtn"></span></div>
+        <div class="name-line"><span class="editable" id="nameBtn">Mia Keilmann</span></div>
+      </div>
+      <img src="assets/img/logo_rechts.png" alt="Logo rechts" class="logo-day">
+      <img src="assets/img/logo_rechts_night.png" alt="Logo rechts" class="logo-night">
+    </div>
+
+    <div class="info-row">
+      <details class="info-block">
+        <summary>Erforderliches Format</summary>
+        <p><strong>Aufgaben eingeben</strong></p>
+        <ul>
+          <li>Bis zu 40 Aufgaben eingeben.</li>
+          <li>Einzelne Aufgaben durch Enter (neue Zeile), Tab oder <strong>;</strong> trennen.</li>
+          <li>Jede Aufgabe kann in einer der folgenden Formen eingegeben werden:
+            <ul>
+              <li>ZAHL OPERATOR ZAHL<br>Beispiel: 8 * 7</li>
+              <li>Aufgabe mit Platzhalter für die gesuchte Zahl<br>Der Platzhalter kann <strong>_</strong>, ein einzelner Buchstabe oder eine Buchstabenkombination sein, z. B. <strong>x</strong>.</li>
+            </ul>
+          </li>
+          <li>Erlaubte Operatoren: <strong>+ - * /</strong></li>
+          <li>Beispiele:
+            <ul>
+              <li>x + 7 = 12</li>
+              <li>5 + 7 = _</li>
+            </ul>
+          </li>
+        </ul>
+      </details>
+      <details class="info-block">
+        <summary>KI-Prompt</summary>
+        <p>Du kannst dir passende Aufgaben auch von einer KI erstellen lassen und sie anschließend hier einfügen. Passe den Prompt einfach an deine eigenen Wünsche an. Beachte dabei die oben genannten Eingaberegeln.</p>
+        <p>Beispiel-Prompt:</p>
+        <pre id="kiPromptText">Erstelle 40 Rechenaufgaben für die 3. Klasse mit Addition und Subtraktion im zweistelligen Bereich. Alle Ergebnisse sollen zwischen 11 und 99 liegen.
+
+- 20 Aufgaben mit + und 20 Aufgaben mit -
+- Jeweils 15 Aufgaben pro Rechenart mit Zehnerwechsel
+- Formuliere jede Aufgabe zunächst vollständig, z. B. 42+19=61.
+- Bestimme anschließend für jede Aufgabe zufällig eine der drei Zahlen als gesuchte Zahl und ersetze sie durch x. Beispiele: 42+19=x oder x+19=61.
+- Randomisiere abschließend die Reihenfolge aller 40 Aufgaben.
+
+Gib ausschließlich die fertigen Aufgaben aus: keine Einleitung, keine Abschlusssätze und keine Nummerierung. Jede Aufgabe in einer eigenen Zeile.</pre>
+        <button class="copy-btn" id="copyPromptBtn">In Zwischenablage kopieren</button>
+      </details>
+    </div>
+
+    <textarea id="taskInput" placeholder="7+8
+7+_=15
+15-7=_
+_*8=56
+3,5+2=_
+x+5=13
+... (maximal 40 Aufgaben)"></textarea>
+
+    <div class="btn-row" style="margin-top: 14px;">
+      <button id="generateBtn" class="btn-emphasized">Blatt erstellen</button>
+      <button id="printBtn">Drucken / Als PDF speichern</button>
+      <button id="resetBtn">Zurücksetzen</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="sheet" id="sheet" style="display:none;">
+    <div class="header">
+      <img src="assets/img/logo_links.png" alt="Logo links" class="logo-day">
+      <img src="assets/img/logo_links_night.png" alt="Logo links" class="logo-night">
+      <div class="title-block">
+        <h1 id="sheetTitle">Mathe-Übungsblatt</h1>
+        <div class="meta-line" id="sheetDate"></div>
+        <div class="student-name" id="sheetName">Mia Keilmann</div>
+      </div>
+      <img src="assets/img/logo_rechts.png" alt="Logo rechts" class="logo-day">
+      <img src="assets/img/logo_rechts_night.png" alt="Logo rechts" class="logo-night">
+    </div>
+
+    <div class="columns">
+      <div class="col" id="col1"></div>
+      <div class="col" id="col2"></div>
+    </div>
+  </div>
+
+<script>
+/* ---------- Nachtmodus ---------- */
+let manualOverride = null; // null = System folgen, sonst true/false
+
+function systemPrefersDark() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function applyTheme() {
+  const dark = manualOverride === null ? systemPrefersDark() : manualOverride;
+  document.documentElement.classList.toggle('dark-mode', dark);
+  document.getElementById('themeToggle').textContent = dark ? '☀' : '☾';
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const currentlyDark = manualOverride === null ? systemPrefersDark() : manualOverride;
+  manualOverride = !currentlyDark;
+  applyTheme();
+});
+
+if (window.matchMedia) {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const onChange = () => { if (manualOverride === null) applyTheme(); };
+  if (mq.addEventListener) {
+    mq.addEventListener('change', onChange);
+  } else if (mq.addListener) {
+    mq.addListener(onChange);
+  }
+}
+
+applyTheme();
+
+/* ---------- Inline editierbare Buttons ---------- */
+function makeEditable(el, initialValue) {
+  el.textContent = initialValue;
+  el.dataset.value = initialValue;
+  el.addEventListener('click', () => {
+    if (el.querySelector('input')) return;
+    const current = el.dataset.value;
+    el.textContent = '';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current;
+    el.appendChild(input);
+    input.focus();
+    input.select();
+
+    const commit = () => {
+      const newVal = input.value.trim() || current;
+      el.dataset.value = newVal;
+      el.textContent = newVal;
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+    });
+  });
+}
+
+function pad2(n) {
+  return n < 10 ? '0' + n : String(n);
+}
+
+function formatDateDE(d) {
+  const dd = pad2(d.getDate());
+  const mm = pad2(d.getMonth() + 1);
+  const yyyy = d.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
+makeEditable(document.getElementById('titleBtn'), 'Mathe-Übungsblatt');
+makeEditable(document.getElementById('nameBtn'), 'Mia Keilmann');
+makeEditable(document.getElementById('dateBtn'), formatDateDE(new Date()));
+
+/* ---------- KI-Prompt kopieren ---------- */
+document.getElementById('copyPromptBtn').addEventListener('click', () => {
+  const text = document.getElementById('kiPromptText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyPromptBtn');
+    const old = btn.textContent;
+    btn.textContent = 'Kopiert!';
+    setTimeout(() => btn.textContent = old, 1500);
+  });
+});
+
+/* ---------- Aufgaben-Parsing & Rendern ---------- */
+const DEFAULT_TASKS = `6*7=_
+6*_=60
+_*10=20
+20/4=_
+56/8=_
+2*6=_
+3*_=12
+_*10=30
+30/5=_
+64/8=_
+7*7=_
+3*_=24
+_*6=24
+18/2=_
+18/3=_
+7*10=_
+4*_=36
+_*6=36
+28/4=_
+50/5=_
+9*9=_
+2*_=16
+_*4=16
+21/3=_
+9/3=_
+6*8=_
+3*_=27
+_*9=72
+32/4=_
+54/6=_
+7*9=_
+7*_=56
+_*8=64
+36/4=_
+16/2=_
+6*_=42
+_*8=24
+81/9=_
+18/9=_
+_*6=12`;
+
+const OPERAND = "(?:[0-9]+(?:,[0-9]+)?|[A-Za-zÄÖÜäöüß]+|_)";
+const OPERATOR = "([+\\-*/×÷])";
+const isNumber = s => /^[0-9]+(?:,[0-9]+)?$/.test(s);
+const normalizeOp = op => op === "×" ? "*" : op === "÷" ? "/" : op;
+
+function parseLine(rawLine) {
+  const line = rawLine.replace(/\s+/g, "");
+  if (line.length === 0) return null;
+
+  let m = line.match(new RegExp(`^(${OPERAND})${OPERATOR}(${OPERAND})=(${OPERAND})$`));
+  if (m) {
+    const [, a, op, b, c] = m;
+    const unknownCount = [a, b, c].filter(p => !isNumber(p)).length;
+    if (unknownCount !== 1) return null;
+    return { a, op: normalizeOp(op), b, c };
+  }
+
+  m = line.match(new RegExp(`^(${OPERAND})${OPERATOR}(${OPERAND})$`));
+  if (m) {
+    const [, a, op, b] = m;
+    if (!isNumber(a) || !isNumber(b)) return null;
+    return { a, op: normalizeOp(op), b, c: "_" };
+  }
+
+  return null;
+}
+
+function renderToken(tok) {
+  if (!isNumber(tok)) return '<span class="box"></span>';
+  return `<span>${tok}</span>`;
+}
+
+function opSymbol(op) {
+  if (op === "*") return "×";
+  if (op === "/") return "÷";
+  return op;
+}
+
+function buildTaskHTML(num, task) {
+  return `<div class="task"><span class="task-num">${num}.</span>` +
+    `${renderToken(task.a)} <span>${opSymbol(task.op)}</span> ${renderToken(task.b)} ` +
+    `<span>=</span> ${renderToken(task.c)}</div>`;
+}
+
+document.getElementById("generateBtn").addEventListener("click", () => {
+  const rawInput = document.getElementById("taskInput").value;
+  const usedDefault = rawInput.trim().length === 0;
+  const raw = usedDefault ? DEFAULT_TASKS : rawInput;
+  const lines = raw.split(/[\n;\t]+/).map(l => l.trim()).filter(l => l.length > 0);
+  const status = document.getElementById("status");
+
+  const parsed = [];
+  const errors = [];
+  lines.forEach((line, i) => {
+    const t = parseLine(line);
+    if (t) parsed.push(t);
+    else errors.push(`Zeile ${i + 1}: "${line}"`);
+  });
+
+  let truncated = false;
+  if (parsed.length > 40) {
+    parsed.length = 40;
+    truncated = true;
+  }
+
+  const statusParts = [];
+  if (usedDefault) {
+    statusParts.push(`${parsed.length} Beispielaufgaben erstellt (kein eigener Text eingegeben).`);
+  }
+  if (errors.length > 0) {
+    statusParts.push(`Konnte ${errors.length} Zeile(n) nicht lesen: ${errors.slice(0,3).join(" | ")}${errors.length>3 ? " ..." : ""}`);
+  }
+  if (truncated) {
+    statusParts.push("Mehr als 40 Aufgaben eingegeben — nur die ersten 40 werden angezeigt.");
+  }
+  status.textContent = statusParts.length > 0 ? statusParts.join(" ") : `${parsed.length} Aufgabe(n) erkannt.`;
+
+  if (parsed.length === 0) return;
+
+  const half = Math.ceil(parsed.length / 2);
+  const col1Tasks = parsed.slice(0, half);
+  const col2Tasks = parsed.slice(half);
+
+  document.getElementById("col1").innerHTML = col1Tasks.map((t, i) => buildTaskHTML(i + 1, t)).join("\n");
+  document.getElementById("col2").innerHTML = col2Tasks.map((t, i) => buildTaskHTML(half + i + 1, t)).join("\n");
+
+  document.getElementById("sheetTitle").textContent = document.getElementById("titleBtn").dataset.value || "Übungsblatt";
+  document.getElementById("sheetDate").textContent = document.getElementById("dateBtn").dataset.value || "";
+  document.getElementById("sheetName").textContent = document.getElementById("nameBtn").dataset.value || "";
+
+  document.getElementById("sheet").style.display = "block";
+
+  document.getElementById("generateBtn").classList.remove("btn-emphasized");
+  document.getElementById("printBtn").classList.add("btn-emphasized");
+});
+
+document.getElementById("printBtn").addEventListener("click", () => {
+  window.print();
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("taskInput").value = "";
+  document.getElementById("sheet").style.display = "none";
+  document.getElementById("status").textContent = "";
+
+  document.getElementById("printBtn").classList.remove("btn-emphasized");
+  document.getElementById("generateBtn").classList.add("btn-emphasized");
+});
+</script>
+
+</body>
+</html>

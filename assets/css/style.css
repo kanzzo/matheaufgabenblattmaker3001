@@ -1,0 +1,152 @@
+/* ============================================================
+   RECHEN-ÜBUNGSBLATT – VORLAGE (Schwarz-Weiß, für Laserdrucker)
+   Ausgelegt auf: 40 Aufgaben, 2 Spalten à 20 Aufgaben, A4 Hochformat
+   ============================================================
+   Alle Stellschrauben stehen unten als Variablen (:root).
+   Wenn nach dem PDF-Export etwas nicht passt:
+   - zu wenig Platz unten  -> --row-padding oder --font-size verkleinern
+   - Kästchen zu klein      -> --box-width / --box-height erhöhen
+   - Logo zu dominant       -> --logo-size verkleinern
+   ============================================================
+   BENÖTIGTE DATEIEN IM SELBEN ORDNER (feste Namen, nicht ändern):
+   - style.css
+   - logo_links.png
+   - logo_rechts.png
+   ============================================================ */
+
+:root {
+  /* Seitenränder (müssen zur @page Regel passen) */
+  --page-margin: 12mm;
+
+  /* Logos oben links / rechts */
+  --logo-size: 105px;
+
+  /* Schrift & Zeilenabstand der Aufgaben */
+  --font-size: 19px;
+  --row-padding: 3px;
+
+  /* Eintrage-Kästchen (doppelt so breit für 4-stellige Zahlen) */
+  --box-width: 100px;
+  --box-height: 37px;
+  --box-border: 1px;
+
+  /* Schrift-Rollen: Haupttext kommt von body, --font-mono ist die
+     zentrale Rolle fuer Code-/Eingabe-Schnipsel (Textarea, Beispiel-
+     und KI-Prompt-Bloecke) */
+  --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+/* Farben – reines Schwarz-Weiß / ein Grau für SW-Druck
+   (gleiche Rollen wie in app.css: --bg, --text-primary, --text-secondary, --border)
+   Bewusst auf @media print beschraenkt, damit diese Werte NIE auf dem
+   Bildschirm landen koennen, egal welche Selektoren/Ladereihenfolge
+   app.css fuer den Bildschirm-Modus verwendet. */
+@media print {
+  :root {
+    --bg: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #C6C6C6;
+    --border: #C6C6C6;
+  }
+}
+
+@page { size: A4; margin: var(--page-margin); }
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 4px;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-print-color-adjust: exact;
+}
+
+.sheet {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px 30px 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header img {
+  width: var(--logo-size);
+  height: var(--logo-size);
+  object-fit: cover;
+  flex-shrink: 0;
+  filter: grayscale(100%);
+}
+
+.title-block {
+  flex: 1;
+  text-align: center;
+}
+
+h1 {
+  font-size: 22px;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.student-name {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.meta-line {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.columns {
+  display: flex;
+  gap: 60px;
+  margin-top: 14px;
+}
+
+.col {
+  flex: 1;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size);
+  padding: var(--row-padding) 2px;
+  border-bottom: 1px dotted var(--border);
+  white-space: nowrap;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.task-num {
+  width: 33px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.task > span:not(.box):not(.task-num) {
+  margin: 0 4px;
+}
+
+.box {
+  display: inline-block;
+  width: var(--box-width);
+  height: var(--box-height);
+  border: var(--box-border) solid var(--border);
+  border-radius: 10px;
+  margin: 0 6px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
