@@ -232,7 +232,6 @@ details.info-block pre {
 
   .box {
     background: var(--card-bg);
-    border-color: var(--text-primary);
   }
 }
 
