@@ -18,7 +18,7 @@
     --text-primary: #0A0A0A;
     --text-secondary: #73736D;
     --text-emphasis: #0A0A0A;
-    --border: #D8D8D6;
+    --border: #848480;
     --logo-size: clamp(105px, 20vw, 195px);
   }
 
@@ -28,7 +28,7 @@
     --text-primary: #B5B5B5;
     --text-secondary: #A0A0A0;
     --text-emphasis: #CBCBCB;
-    --border: #444444;
+    --border: #6a6a66;
   }
 }
 
@@ -232,6 +232,7 @@ details.info-block pre {
 
   .box {
     background: var(--card-bg);
+    border-color: var(--text-primary);
   }
 }
 
