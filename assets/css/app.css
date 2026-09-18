@@ -17,6 +17,7 @@
     --card-bg: #F3E8D2;
     --text-primary: #0A0A0A;
     --text-secondary: #73736D;
+    --text-emphasis: #0A0A0A;
     --border: #D8D8D6;
     --logo-size: clamp(105px, 20vw, 195px);
   }
@@ -24,8 +25,9 @@
   html.dark-mode {
     --bg: #121212;
     --card-bg: #1E1E1E;
-    --text-primary: #E6E6E2;
+    --text-primary: #B5B5B5;
     --text-secondary: #A0A0A0;
+    --text-emphasis: #CBCBCB;
     --border: #444444;
   }
 }
@@ -154,7 +156,7 @@ button {
 
 .btn-row button.btn-emphasized {
   background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.05)), var(--card-bg);
-  color: var(--text-primary);
+  color: var(--text-emphasis);
 }
 
 pre, textarea {
@@ -226,6 +228,10 @@ details.info-block pre {
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 12px;
+  }
+
+  .box {
+    background: var(--card-bg);
   }
 }
 
